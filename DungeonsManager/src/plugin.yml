@@ -1,0 +1,15 @@
+main: me.goodgamer123.DungeonsManager.MainClass
+name: DungeonsManager
+version: 1.0.0
+api-version: 1.16
+author: goodgamer123
+description: DungeonsManager!
+
+commands:
+  donjonjoint:
+    description: Open the dungeons menu.
+  back:
+    description: Back to main world.
+  donjonmanager:
+    description: setup the dungeon manager.
+    permission: dungeonmanager.manager
