@@ -15,7 +15,7 @@ public class DungeonManager {
 
 	public static void setplayeramount(Player p, int page) {
 		
-		Inventory inv = Bukkit.createInventory(null, 54, ChatColor.DARK_AQUA + "Donjons - Page " + page);
+		Inventory inv = Bukkit.createInventory(null, 54, ChatColor.DARK_AQUA + "DonjonManager: Donjons - Page " + page);
 		
 		ItemStack filling = new ItemStack(Material.CYAN_STAINED_GLASS_PANE);
 		ItemMeta fillingMeta = filling.getItemMeta();
@@ -70,6 +70,7 @@ public class DungeonManager {
 			inv.setItem(i + 1, players);
 			playersMeta.setDisplayName(ChatColor.AQUA + "" + i + " Joueurs");
 			players.setItemMeta(playersMeta);
+			players.setAmount(i);
 		}
 		for (int i = 0; i < 46; i = i + 9) {
 			inv.setItem(i, filling);

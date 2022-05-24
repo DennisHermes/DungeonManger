@@ -1,7 +1,5 @@
 package me.goodgamer123.DungeonsManager;
 
-import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -73,15 +71,47 @@ public class MainClass extends JavaPlugin {
 				return false;
 			}
 			
-			Inventory inv = Bukkit.createInventory(null, 9, ChatColor.DARK_AQUA + "Donjons");
+			Inventory inv = Bukkit.createInventory(null, 45, ChatColor.DARK_AQUA + "Combien de joueurs?");
 			
-			List<String> dungeons = DataManager.getDungeons();
-			for (int i = 0; i < dungeons.size(); i++) {
-				ItemStack item = new ItemStack(Material.CHISELED_STONE_BRICKS);
-				ItemMeta itemMeta = item.getItemMeta();
-				itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', dungeons.get(i)));
-				item.setItemMeta(itemMeta);
-				inv.addItem(item);
+			ItemStack filling = new ItemStack(Material.CYAN_STAINED_GLASS_PANE);
+			ItemMeta fillingMeta = filling.getItemMeta();
+			fillingMeta.setDisplayName(" ");
+			filling.setItemMeta(fillingMeta);
+			
+			ItemStack players = new ItemStack(Material.TOTEM_OF_UNDYING);
+			ItemMeta playersMeta = players.getItemMeta();
+			playersMeta.setDisplayName(ChatColor.AQUA + "Jouer avec 1 joueur");
+			players.setItemMeta(playersMeta);
+			
+			ItemStack single = new ItemStack(Material.POPPY);
+			ItemMeta singleMeta = single.getItemMeta();
+			singleMeta.setDisplayName(ChatColor.AQUA + "Solo");
+			single.setItemMeta(singleMeta);
+			
+			ItemStack multi = new ItemStack(Material.ROSE_BUSH);
+			ItemMeta multiMeta = multi.getItemMeta();
+			multiMeta.setDisplayName(ChatColor.AQUA + "Multijoueur");
+			multi.setItemMeta(multiMeta);
+			
+			ItemStack close = new ItemStack(Material.BARRIER);
+			ItemMeta closeMeta = filling.getItemMeta();
+			closeMeta.setDisplayName(ChatColor.RED + "Fermer");
+			close.setItemMeta(closeMeta);
+			
+			for (int i = 0; i < inv.getSize(); i++) {
+				inv.setItem(i, filling);
+			}
+			
+			inv.setItem(11, single);
+			inv.setItem(14, multi);
+			inv.setItem(40, close);
+			
+			for (int i = 2; i < 6; i++) {
+				if (i == 2) inv.setItem(20, players);
+				else inv.setItem(19 + i, players);
+				playersMeta.setDisplayName(ChatColor.AQUA + "" + i + " Joueurs");
+				players.setItemMeta(playersMeta);
+				players.setAmount(i);
 			}
 			
 			p.openInventory(inv);
