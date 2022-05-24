@@ -15,7 +15,7 @@ public class DungeonManager {
 
 	public static void setplayeramount(Player p, int page) {
 		
-		Inventory inv = Bukkit.createInventory(null, 54, ChatColor.DARK_AQUA + "Donjons - Page 1");
+		Inventory inv = Bukkit.createInventory(null, 54, ChatColor.DARK_AQUA + "Donjons - Page " + page);
 		
 		ItemStack filling = new ItemStack(Material.CYAN_STAINED_GLASS_PANE);
 		ItemMeta fillingMeta = filling.getItemMeta();
@@ -86,7 +86,7 @@ public class DungeonManager {
 		
 		List<String> dungeons = DataManager.getDungeons();
 		
-		if (dungeons.size() >= 1) {
+		if (dungeons.size() >=  (4 * (page - 1)) + 1) {
 			for (int i = 12; i < 16; i++) {
 				int playerCount = (i - 11);
 				
@@ -95,12 +95,12 @@ public class DungeonManager {
 				trueItem.setItemMeta(trueItemMeta);
 				falseItem.setItemMeta(falseItemMeta);
 				
-				if (DataManager.isPlayableWith(dungeons.get(0), playerCount + "")) inv.setItem(i, trueItem);
+				if (DataManager.isPlayableWith(dungeons.get((4 * (page - 1))), playerCount + "")) inv.setItem(i, trueItem);
 				else inv.setItem(i, falseItem);
 			}
 		}
 		
-		if (dungeons.size() >= 2) {
+		if (dungeons.size() >= (4 * (page - 1)) + 2) {
 			for (int i = 21; i < 25; i++) {
 				int playerCount = (i - 20);
 				
@@ -109,12 +109,12 @@ public class DungeonManager {
 				trueItem.setItemMeta(trueItemMeta);
 				falseItem.setItemMeta(falseItemMeta);
 				
-				if (DataManager.isPlayableWith(dungeons.get(1), playerCount + "")) inv.setItem(i, trueItem);
+				if (DataManager.isPlayableWith(dungeons.get((4 * (page - 1)) + 1), playerCount + "")) inv.setItem(i, trueItem);
 				else inv.setItem(i, falseItem);
 			}
 		}
 		
-		if (dungeons.size() >= 3) {
+		if (dungeons.size() >= (4 * (page - 1)) + 3) {
 			for (int i = 30; i < 34; i++) {
 				int playerCount = (i - 29);
 				
@@ -123,12 +123,12 @@ public class DungeonManager {
 				trueItem.setItemMeta(trueItemMeta);
 				falseItem.setItemMeta(falseItemMeta);
 				
-				if (DataManager.isPlayableWith(dungeons.get(2), playerCount + "")) inv.setItem(i, trueItem);
+				if (DataManager.isPlayableWith(dungeons.get((4 * (page - 1)) + 2), playerCount + "")) inv.setItem(i, trueItem);
 				else inv.setItem(i, falseItem);
 			}
 		}
 		
-		if (dungeons.size() >= 4) {
+		if (dungeons.size() >= (4 * (page - 1)) + 4) {
 			for (int i = 39; i < 43; i++) {
 				int playerCount = (i - 38);
 				
@@ -137,7 +137,7 @@ public class DungeonManager {
 				trueItem.setItemMeta(trueItemMeta);
 				falseItem.setItemMeta(falseItemMeta);
 				
-				if (DataManager.isPlayableWith(dungeons.get(3), playerCount + "")) inv.setItem(i, trueItem);
+				if (DataManager.isPlayableWith(dungeons.get((4 * (page - 1)) + 3), playerCount + "")) inv.setItem(i, trueItem);
 				else inv.setItem(i, falseItem);
 			}
 		}
@@ -146,11 +146,11 @@ public class DungeonManager {
 		if (page > 1) inv.setItem(48, previous);
 		else inv.setItem(48, filling);
 		inv.setItem(49, close);
-		if (dungeons.size() > 5) inv.setItem(50, next);
+		if (dungeons.size() > (4 * page)) inv.setItem(50, next);
 		else inv.setItem(50, filling);
 		inv.setItem(51, filling);
 		
-		for (int i = 0; i < dungeons.size(); i++) {
+		for (int i = (4 * (page - 1)); i < dungeons.size(); i++) {
 			ItemStack item = new ItemStack(Material.CHISELED_STONE_BRICKS);
 			ItemMeta itemMeta = item.getItemMeta();
 			itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', dungeons.get(i)));

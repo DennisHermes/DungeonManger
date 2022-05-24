@@ -30,7 +30,7 @@ public class GUIClickEvent implements Listener {
 				else if (e.getCurrentItem().getItemMeta().getDisplayName().contains("4")) players = 4;
 				
 				String mapName = e.getInventory().getItem(e.getSlot() - (players + 1)).getItemMeta().getDisplayName().replace('§', '&');
-				int currentPage = Integer.getInteger(ChatColor.stripColor(e.getView().getTitle().replace("Donjons - Page ", "")));
+				int currentPage = Integer.parseInt(ChatColor.stripColor(e.getView().getTitle().replace("Donjons - Page ", "")));
 				
 				if (e.getCurrentItem().getType().equals(Material.GREEN_TERRACOTTA))  DataManager.removePlayableWith(mapName, players + "");
 				else DataManager.addPlayableWith(mapName, players + "");
@@ -45,13 +45,25 @@ public class GUIClickEvent implements Listener {
 			} else if (e.getCurrentItem().getType().equals(Material.ARROW)) {
 				if (e.getCurrentItem().getItemMeta().getDisplayName().contains("Page suivante")) {
 					
-					int currentPage = Integer.getInteger(ChatColor.stripColor(e.getView().getTitle().replace("Donjons - Page ", "")));
-					DungeonManager.setplayeramount((Player) e.getWhoClicked(), currentPage + 1);
+					int currentPage = Integer.parseInt(ChatColor.stripColor(e.getView().getTitle().replace("Donjons - Page ", "")));
+					
+					new BukkitRunnable() { 
+						@Override
+						public void run() {
+							DungeonManager.setplayeramount((Player) e.getWhoClicked(), currentPage + 1);
+						}
+					}.runTaskLater(MainClass.getPlugin(MainClass.class), 1);
 					
 				} else if (e.getCurrentItem().getItemMeta().getDisplayName().contains("Page précédente")) {
 					
-					int currentPage = Integer.getInteger(ChatColor.stripColor(e.getView().getTitle().replace("Donjons - Page ", "")));
-					DungeonManager.setplayeramount((Player) e.getWhoClicked(), currentPage - 1);
+					int currentPage = Integer.parseInt(ChatColor.stripColor(e.getView().getTitle().replace("Donjons - Page ", "")));
+
+					new BukkitRunnable() { 
+						@Override
+						public void run() {
+							DungeonManager.setplayeramount((Player) e.getWhoClicked(), currentPage - 1);
+						}
+					}.runTaskLater(MainClass.getPlugin(MainClass.class), 1);
 					
 				}
 			}
