@@ -8,7 +8,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -17,6 +19,7 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 public class DataManager {
 
@@ -33,6 +36,56 @@ public class DataManager {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	//==================================================================================================================================================//
+	
+	static Map<String, List<String>> games = new HashMap<String, List<String>>();
+	
+	public static void createGame(Player p, String dungeon, int players) {
+		List<String> dataList = new ArrayList<>();
+		dataList.add(dungeon);
+		dataList.add(players + "");
+		dataList.add(p.getName());
+		String worldName = dungeon.replace('§', '&');
+		File worldFile = new File(MainClass.getPlugin(MainClass.class).getDataFolder() + "/" + worldName);
+		World loadedMap = loadMap(worldFile);
+		games.put(loadedMap.getName(), dataList);
+		DungeonTeleporter.requestedWorlds.put(p, loadedMap);
+	}
+	
+	public static void joinGame(Player p, String game) {
+		List<String> dataList = games.get(game);
+		String players = dataList.get(2) + "," + p.getName();
+		dataList.set(2, players);
+		games.put(game, dataList);
+		DungeonTeleporter.requestedWorlds.put(p, Bukkit.getWorld(game));
+	}
+	
+	public static void leaveGame(Player p, String game) {
+		List<String> dataList = games.get(game);
+		String players = dataList.get(2).replace(p.getName(), "");
+		players = players.replace(",,", ",");
+		if (players.length() > 3) {
+			dataList.set(2, players);
+			games.put(game, dataList);
+			DungeonTeleporter.requestedWorlds.remove(p);
+		} else {
+			games.put(game, null);
+		}
+	}
+	
+	public static List<String> getGames(int players) {
+		List<String> gamesAvailable = new ArrayList<String>();
+		for (Map.Entry<String, List<String>> entry : games.entrySet()) {
+		    List<String> list = entry.getValue();
+		    if (list.get(0).equals(players + "")) gamesAvailable.add(list.get(0));
+		}
+		return gamesAvailable;
+	}
+	
+	public static String[] getPlayers(String game) {
+		return games.get(game).get(2).split(",");
 	}
 	
 	//==================================================================================================================================================//

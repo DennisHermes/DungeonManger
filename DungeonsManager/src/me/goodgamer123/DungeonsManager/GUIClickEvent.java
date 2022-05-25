@@ -1,7 +1,10 @@
 package me.goodgamer123.DungeonsManager;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,6 +20,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class GUIClickEvent implements Listener {
 
+	Map<Player, Integer> selectedPlayers = new HashMap<Player, Integer>();
+	
 	@EventHandler
 	public void dungeonPlayers(InventoryClickEvent e) {
 		if (e.getSlot() > e.getView().getTopInventory().getSize()) return;
@@ -75,6 +80,8 @@ public class GUIClickEvent implements Listener {
 				
 			} else if (e.getCurrentItem().getType().equals(Material.TOTEM_OF_UNDYING)) {
 				
+				selectedPlayers.put((Player) e.getWhoClicked(), e.getCurrentItem().getAmount());
+				
 				ItemStack filling = new ItemStack(Material.CYAN_STAINED_GLASS_PANE);
 				ItemMeta fillingMeta = filling.getItemMeta();
 				fillingMeta.setDisplayName(" ");
@@ -120,8 +127,14 @@ public class GUIClickEvent implements Listener {
 				
 				inv.setItem(inv.getSize() - 5, close);
 				if (itemCount > 36) inv.setItem(inv.getSize() - 4, next);
-				
-				e.getWhoClicked().openInventory(inv);
+
+				Inventory inv0 = inv;
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						e.getWhoClicked().openInventory(inv0);
+					}
+				}.runTaskLater(MainClass.getPlugin(MainClass.class), 1);
 				
 			}
 			
@@ -194,7 +207,136 @@ public class GUIClickEvent implements Listener {
 				if (itemCount > 36) inv.setItem(inv.getSize() - 4, next);
 				if (newPage > 1) inv.setItem(inv.getSize() - 6, previous);
 				
-				e.getWhoClicked().openInventory(inv);
+				Inventory inv0 = inv;
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						e.getWhoClicked().openInventory(inv0);
+					}
+				}.runTaskLater(MainClass.getPlugin(MainClass.class), 1);
+				
+			} else if (e.getCurrentItem().getType().equals(Material.CHISELED_STONE_BRICKS)) {
+				
+				if (selectedPlayers.get(e.getWhoClicked()) == 1) {
+					e.getWhoClicked().closeInventory();
+					e.getWhoClicked().teleport(DataManager.getWaitRoomLoc());
+					e.getWhoClicked().sendMessage(ChatColor.AQUA + "Le monde est en train de se charger, veuillez patienter...");
+					
+					String worldName = e.getCurrentItem().getItemMeta().getDisplayName().replace('§', '&');
+					File worldFile = new File(MainClass.getPlugin(MainClass.class).getDataFolder() + "/" + worldName);
+					
+					DungeonTeleporter.requestedWorlds.put((Player) e.getWhoClicked(), DataManager.loadMap(worldFile));
+				} else {
+					Inventory inv = Bukkit.createInventory(null, 27, ChatColor.AQUA + "Donjon: " + ChatColor.RESET + ChatColor.translateAlternateColorCodes('&', e.getCurrentItem().getItemMeta().getDisplayName()));
+					
+					ItemStack filling = new ItemStack(Material.CYAN_STAINED_GLASS_PANE);
+					ItemMeta fillingMeta = filling.getItemMeta();
+					fillingMeta.setDisplayName(" ");
+					filling.setItemMeta(fillingMeta);
+					
+					ItemStack newGame = new ItemStack(Material.ARROW);
+					ItemMeta newGameMeta = newGame.getItemMeta();
+					newGameMeta.setDisplayName(ChatColor.AQUA + "Créer un nouveau jeu");
+					newGame.setItemMeta(newGameMeta);
+					
+					ItemStack joinGame = new ItemStack(Material.TIPPED_ARROW);
+					ItemMeta joinGameMeta = joinGame.getItemMeta();
+					joinGameMeta.setDisplayName(ChatColor.AQUA + "Rejoindre une jeu existant");
+					joinGame.setItemMeta(joinGameMeta);
+					
+					ItemStack close = new ItemStack(Material.BARRIER);
+					ItemMeta closeMeta = close.getItemMeta();
+					closeMeta.setDisplayName(ChatColor.RED + "Fermer");
+					close.setItemMeta(closeMeta);
+					
+					for (int i = 0; i < inv.getSize(); i++) {
+						inv.setItem(i, filling);
+					}
+					
+					inv.setItem(11, newGame);
+					inv.setItem(15, joinGame);
+					inv.setItem(22, close);
+					
+					Inventory inv0 = inv;
+					new BukkitRunnable() {
+						@Override
+						public void run() {
+							e.getWhoClicked().openInventory(inv0);
+						}
+					}.runTaskLater(MainClass.getPlugin(MainClass.class), 1);
+				}
+				
+			}
+		}
+		
+		
+		
+		else if (e.getView().getTitle().startsWith(ChatColor.AQUA + "Donjon: ")) {
+			e.setCancelled(true);
+			
+			if (e.getCurrentItem().getType().equals(Material.BARRIER)) {
+				
+				e.getWhoClicked().closeInventory();
+				
+			} else if (e.getCurrentItem().getType().equals(Material.ARROW)) {
+				
+				e.getWhoClicked().closeInventory();
+				e.getWhoClicked().teleport(DataManager.getWaitRoomLoc());
+				e.getWhoClicked().sendMessage(ChatColor.AQUA + "Le monde est en train de se charger, veuillez patienter...");
+				
+				DataManager.createGame((Player) e.getWhoClicked(), e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: ", "").replace('§', '&'), selectedPlayers.get(e.getWhoClicked()));
+				
+			} else if (e.getCurrentItem().getType().equals(Material.TIPPED_ARROW)) {
+				
+				ItemStack close = new ItemStack(Material.BARRIER);
+				ItemMeta closeMeta = close.getItemMeta();
+				closeMeta.setDisplayName(ChatColor.RED + "Fermer");
+				close.setItemMeta(closeMeta);
+				
+				ItemStack filling = new ItemStack(Material.CYAN_STAINED_GLASS_PANE);
+				ItemMeta fillingMeta = filling.getItemMeta();
+				fillingMeta.setDisplayName(" ");
+				filling.setItemMeta(fillingMeta);
+				
+				ItemStack newGame = new ItemStack(Material.ARROW);
+				ItemMeta newGameMeta = newGame.getItemMeta();
+				newGameMeta.setDisplayName(ChatColor.AQUA + "Créer un nouveau jeu");
+				newGame.setItemMeta(newGameMeta);
+				
+				int itemCount = 0;
+				List<ItemStack> items = new ArrayList<ItemStack>(); 
+				List<String> dungeons = DataManager.getGames(selectedPlayers.get(e.getWhoClicked()));
+				
+				for (int i = 0; i < dungeons.size(); i++) {
+					ItemStack item = new ItemStack(Material.CHISELED_STONE_BRICKS);
+					ItemMeta itemMeta = item.getItemMeta();
+					itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', dungeons.get(i)));
+					item.setItemMeta(itemMeta);
+					items.add(item);
+					itemCount++;
+				}
+				
+				Inventory inv = Bukkit.createInventory(null, 54, ChatColor.DARK_AQUA + "Donjon join: " + e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: ", ""));
+				if (itemCount <= 9) inv = Bukkit.createInventory(null, 27, ChatColor.DARK_AQUA + "Donjons - Page " + e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: ", ""));
+				else if (itemCount <= 18) inv = Bukkit.createInventory(null, 36, ChatColor.DARK_AQUA + "Donjons - Page " + e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: ", ""));
+				else if (itemCount <= 27) inv = Bukkit.createInventory(null, 45, ChatColor.DARK_AQUA + "Donjons - Page " + e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: ", ""));
+				
+				for (int i = 0; i < items.size(); i++) {
+					inv.addItem(items.get(i));
+				}
+				
+				for (int i = (inv.getSize() - 18); i < inv.getSize(); i++) {
+					inv.setItem(i, filling);
+				}
+				inv.setItem(inv.getSize() - 5, close);
+				
+				Inventory inv0 = inv;
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						e.getWhoClicked().openInventory(inv0);
+					}
+				}.runTaskLater(MainClass.getPlugin(MainClass.class), 1);
 				
 			}
 		}
