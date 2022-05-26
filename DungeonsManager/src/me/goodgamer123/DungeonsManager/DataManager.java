@@ -71,21 +71,29 @@ public class DataManager {
 			games.put(game, dataList);
 			DungeonTeleporter.requestedWorlds.remove(p);
 		} else {
-			games.put(game, null);
+			games.remove(game);
 		}
 	}
 	
-	public static List<String> getGames(int players) {
+	public static List<String> getGames(int players, String dungeonName) {
 		List<String> gamesAvailable = new ArrayList<String>();
 		for (Map.Entry<String, List<String>> entry : games.entrySet()) {
 		    List<String> list = entry.getValue();
-		    if (list.get(0).equals(players + "")) gamesAvailable.add(list.get(0));
+		    if (list.get(0).equals(dungeonName) && list.get(1).equals(players + "")) gamesAvailable.add(entry.getKey().replace("AAA-", ""));
 		}
 		return gamesAvailable;
 	}
 	
 	public static String[] getPlayers(String game) {
 		return games.get(game).get(2).split(",");
+	}
+	
+	public static String getGameOfPlayer(Player p) {
+		for (Map.Entry<String, List<String>> entry : games.entrySet()) {
+		    List<String> list = entry.getValue();
+		    if (list.get(2).contains(p.getName())) return entry.getKey();
+		}
+		return null;
 	}
 	
 	//==================================================================================================================================================//

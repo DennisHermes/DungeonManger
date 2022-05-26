@@ -7,7 +7,9 @@ import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class DungeonTeleporter implements Listener {
@@ -38,6 +40,12 @@ public class DungeonTeleporter implements Listener {
 				}
 			}.runTaskLater(MainClass.getPlugin(MainClass.class), i * 20);
 		}
+	}
+	
+	@EventHandler
+	public void onPlayerLeave(PlayerQuitEvent e) {
+		String game = DataManager.getGameOfPlayer(e.getPlayer());
+		if (game != null) DataManager.leaveGame(e.getPlayer(), game);
 	}
 	
 }

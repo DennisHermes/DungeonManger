@@ -222,6 +222,9 @@ public class GUIClickEvent implements Listener {
 					e.getWhoClicked().teleport(DataManager.getWaitRoomLoc());
 					e.getWhoClicked().sendMessage(ChatColor.AQUA + "Le monde est en train de se charger, veuillez patienter...");
 					
+					String game = DataManager.getGameOfPlayer((Player) e.getWhoClicked());
+					if (game != null) DataManager.leaveGame((Player) e.getWhoClicked(), game);
+					
 					String worldName = e.getCurrentItem().getItemMeta().getDisplayName().replace('§', '&');
 					File worldFile = new File(MainClass.getPlugin(MainClass.class).getDataFolder() + "/" + worldName);
 					
@@ -284,7 +287,10 @@ public class GUIClickEvent implements Listener {
 				e.getWhoClicked().teleport(DataManager.getWaitRoomLoc());
 				e.getWhoClicked().sendMessage(ChatColor.AQUA + "Le monde est en train de se charger, veuillez patienter...");
 				
-				DataManager.createGame((Player) e.getWhoClicked(), e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: ", "").replace('§', '&'), selectedPlayers.get(e.getWhoClicked()));
+				String game = DataManager.getGameOfPlayer((Player) e.getWhoClicked());
+				if (game != null) DataManager.leaveGame((Player) e.getWhoClicked(), game);
+				
+				DataManager.createGame((Player) e.getWhoClicked(), e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: " + ChatColor.RESET, "").replace('§', '&'), selectedPlayers.get(e.getWhoClicked()));
 				
 			} else if (e.getCurrentItem().getType().equals(Material.TIPPED_ARROW)) {
 				
@@ -305,21 +311,29 @@ public class GUIClickEvent implements Listener {
 				
 				int itemCount = 0;
 				List<ItemStack> items = new ArrayList<ItemStack>(); 
-				List<String> dungeons = DataManager.getGames(selectedPlayers.get(e.getWhoClicked()));
+				List<String> dungeons = DataManager.getGames(selectedPlayers.get(e.getWhoClicked()), e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: " + ChatColor.RESET, ""));
 				
 				for (int i = 0; i < dungeons.size(); i++) {
 					ItemStack item = new ItemStack(Material.CHISELED_STONE_BRICKS);
 					ItemMeta itemMeta = item.getItemMeta();
-					itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', dungeons.get(i)));
+					itemMeta.setDisplayName(ChatColor.AQUA + "Game: " + dungeons.get(i));
+					List<String> itemLore = new ArrayList<String>();
+					String[] players = DataManager.getPlayers("AAA-" + dungeons.get(i));
+					itemLore.add(" ");
+					itemLore.add(ChatColor.DARK_AQUA + "Joueurs en attente (" + players.length + "/" + selectedPlayers.get(e.getWhoClicked()) + "):");
+					for (int i0 = 0; i0 < players.length; i0++) {
+						itemLore.add(ChatColor.AQUA + " - " + players[i]);
+					}
+					itemMeta.setLore(itemLore);
 					item.setItemMeta(itemMeta);
 					items.add(item);
 					itemCount++;
 				}
 				
 				Inventory inv = Bukkit.createInventory(null, 54, ChatColor.DARK_AQUA + "Donjon join: " + e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: ", ""));
-				if (itemCount <= 9) inv = Bukkit.createInventory(null, 27, ChatColor.DARK_AQUA + "Donjons - Page " + e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: ", ""));
-				else if (itemCount <= 18) inv = Bukkit.createInventory(null, 36, ChatColor.DARK_AQUA + "Donjons - Page " + e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: ", ""));
-				else if (itemCount <= 27) inv = Bukkit.createInventory(null, 45, ChatColor.DARK_AQUA + "Donjons - Page " + e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: ", ""));
+				if (itemCount <= 9) inv = Bukkit.createInventory(null, 27, ChatColor.DARK_AQUA + "Donjon join: " + e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: ", ""));
+				else if (itemCount <= 18) inv = Bukkit.createInventory(null, 36, ChatColor.DARK_AQUA + "Donjon join: " + e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: ", ""));
+				else if (itemCount <= 27) inv = Bukkit.createInventory(null, 45, ChatColor.DARK_AQUA + "Donjon join: " + e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: ", ""));
 				
 				for (int i = 0; i < items.size(); i++) {
 					inv.addItem(items.get(i));
@@ -337,6 +351,39 @@ public class GUIClickEvent implements Listener {
 						e.getWhoClicked().openInventory(inv0);
 					}
 				}.runTaskLater(MainClass.getPlugin(MainClass.class), 1);
+				
+			}
+		} 
+		
+		
+		
+		else if (e.getView().getTitle().startsWith(ChatColor.DARK_AQUA + "Donjon join: ")) {
+			e.setCancelled(true);
+			
+			if (e.getCurrentItem().getType().equals(Material.BARRIER)) {
+				
+				e.getWhoClicked().closeInventory();
+				
+			} else if (e.getCurrentItem().getType().equals(Material.CHISELED_STONE_BRICKS)) {
+				
+				if (DataManager.getPlayers("AAA-" + e.getCurrentItem().getItemMeta().getDisplayName().replace(ChatColor.AQUA + "Game: ", "")).length < selectedPlayers.get(e.getWhoClicked())) {
+					
+					String game = DataManager.getGameOfPlayer((Player) e.getWhoClicked());
+					if (game != null) {
+						if (game.equals("AAA-" + e.getCurrentItem().getItemMeta().getDisplayName().replace(ChatColor.AQUA + "Game: ", ""))) {
+							e.getWhoClicked().sendMessage(ChatColor.RED + "Vous êtes déjà dans ce jeu");
+							return;
+						} else {
+							DataManager.leaveGame((Player) e.getWhoClicked(), game);
+						}
+					}
+					
+					e.getWhoClicked().closeInventory();
+					e.getWhoClicked().teleport(DataManager.getWaitRoomLoc());
+					DataManager.joinGame((Player) e.getWhoClicked(), "AAA-" + e.getCurrentItem().getItemMeta().getDisplayName().replace(ChatColor.AQUA + "Game: ", ""));
+				} else {
+					e.getWhoClicked().sendMessage(ChatColor.RED + "Le jeu est complet!");
+				}
 				
 			}
 		}

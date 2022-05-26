@@ -32,6 +32,9 @@ public class MainClass extends JavaPlugin {
 				for (Player p : Bukkit.getOnlinePlayers()) {
 					if (!DungeonTeleporter.starting.contains(p) && DungeonTeleporter.requestedWorlds.containsKey(p)) {
 						if (DataManager.isInStartRegion(p.getLocation())) {
+							if (DataManager.getGameOfPlayer(p) != null) {
+								
+							}
 							DungeonTeleporter.StartCountdown(p);
 						}
 					}
