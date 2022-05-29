@@ -75,6 +75,10 @@ public class DataManager {
 		}
 	}
 	
+	public static int getGamesRequiredPlayers(String game) {
+		return Integer.parseInt(games.get(game).get(1));
+	}
+	
 	public static List<String> getGames(int players, String dungeonName) {
 		List<String> gamesAvailable = new ArrayList<String>();
 		for (Map.Entry<String, List<String>> entry : games.entrySet()) {

@@ -1,5 +1,8 @@
 package me.goodgamer123.DungeonsManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -29,13 +32,30 @@ public class MainClass extends JavaPlugin {
 		
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			public void run() {
+				List<Player> checked = new ArrayList<Player>();
 				for (Player p : Bukkit.getOnlinePlayers()) {
-					if (!DungeonTeleporter.starting.contains(p) && DungeonTeleporter.requestedWorlds.containsKey(p)) {
-						if (DataManager.isInStartRegion(p.getLocation())) {
-							if (DataManager.getGameOfPlayer(p) != null) {
-								
+					if (!DungeonTeleporter.starting.contains(p) && DungeonTeleporter.requestedWorlds.containsKey(p) && !checked.contains(p)) {
+						String game = DataManager.getGameOfPlayer(p);
+						if (game != null) {
+							String[] players = DataManager.getPlayers(game);
+							int requiered = DataManager.getGamesRequiredPlayers(game);
+							if (players.length == requiered) {
+								boolean ableToStart = true;
+								for (String player : players) {
+									Player foundPlayer = Bukkit.getPlayer(player);
+									checked.add(foundPlayer);
+									if (!DataManager.isInStartRegion(foundPlayer.getLocation())) ableToStart = false;
+								}
+								if (ableToStart) {
+									for (String player : players) {
+										DungeonTeleporter.StartMultiplayerCountdown(Bukkit.getPlayer(player));
+									}
+								}
+							} else {
+								if (DataManager.isInStartRegion(p.getLocation())) p.sendTitle(ChatColor.RED + "Pas assez de joueurs", ChatColor.DARK_RED + "(" + players.length + "/" + requiered + ")", 1, 40, 1);
 							}
-							DungeonTeleporter.StartCountdown(p);
+						} else {
+							if (DataManager.isInStartRegion(p.getLocation())) DungeonTeleporter.StartSingleplayerCountdown(p);
 						}
 					}
 				}
@@ -146,8 +166,6 @@ public class MainClass extends JavaPlugin {
 			} else {
 				p.sendMessage(ChatColor.RED + "Mauvais argument! Utilisez '/donjonmanager [setwaitroom | setstartregion | setplayeramount]'.");
 			}
-		} else if (cmd.getName().equalsIgnoreCase("back")) {
-			p.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
 		}
 		
 		return false;

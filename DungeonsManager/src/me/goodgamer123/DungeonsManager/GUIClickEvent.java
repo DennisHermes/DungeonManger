@@ -224,6 +224,7 @@ public class GUIClickEvent implements Listener {
 					
 					String game = DataManager.getGameOfPlayer((Player) e.getWhoClicked());
 					if (game != null) DataManager.leaveGame((Player) e.getWhoClicked(), game);
+					if (DungeonTeleporter.requestedWorlds.containsKey(e.getWhoClicked())) DungeonTeleporter.requestedWorlds.remove(e.getWhoClicked());
 					
 					String worldName = e.getCurrentItem().getItemMeta().getDisplayName().replace('§', '&');
 					File worldFile = new File(MainClass.getPlugin(MainClass.class).getDataFolder() + "/" + worldName);
@@ -289,6 +290,7 @@ public class GUIClickEvent implements Listener {
 				
 				String game = DataManager.getGameOfPlayer((Player) e.getWhoClicked());
 				if (game != null) DataManager.leaveGame((Player) e.getWhoClicked(), game);
+				if (DungeonTeleporter.requestedWorlds.containsKey(e.getWhoClicked())) DungeonTeleporter.requestedWorlds.remove(e.getWhoClicked());
 				
 				DataManager.createGame((Player) e.getWhoClicked(), e.getView().getTitle().replace(ChatColor.AQUA + "Donjon: " + ChatColor.RESET, "").replace('§', '&'), selectedPlayers.get(e.getWhoClicked()));
 				
@@ -322,7 +324,7 @@ public class GUIClickEvent implements Listener {
 					itemLore.add(" ");
 					itemLore.add(ChatColor.DARK_AQUA + "Joueurs en attente (" + players.length + "/" + selectedPlayers.get(e.getWhoClicked()) + "):");
 					for (int i0 = 0; i0 < players.length; i0++) {
-						itemLore.add(ChatColor.AQUA + " - " + players[i]);
+						itemLore.add(ChatColor.AQUA + " - " + players[i0]);
 					}
 					itemMeta.setLore(itemLore);
 					item.setItemMeta(itemMeta);
@@ -377,6 +379,7 @@ public class GUIClickEvent implements Listener {
 							DataManager.leaveGame((Player) e.getWhoClicked(), game);
 						}
 					}
+					if (DungeonTeleporter.requestedWorlds.containsKey(e.getWhoClicked())) DungeonTeleporter.requestedWorlds.remove(e.getWhoClicked());
 					
 					e.getWhoClicked().closeInventory();
 					e.getWhoClicked().teleport(DataManager.getWaitRoomLoc());
