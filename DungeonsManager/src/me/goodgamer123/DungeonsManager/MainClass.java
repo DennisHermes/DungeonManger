@@ -21,7 +21,6 @@ public class MainClass extends JavaPlugin {
 	public void onEnable() {
 		
 		getCommand("donjonjoint").setExecutor(this);
-		getCommand("back").setExecutor(this);
 		getCommand("donjonmanager").setExecutor(this);
 		
 		getServer().getPluginManager().registerEvents(new DungeonTeleporter(), this);
@@ -160,12 +159,76 @@ public class MainClass extends JavaPlugin {
 					
 					DungeonManager.setplayeramount(p, 1);
 					
+				} else if (args[0].equalsIgnoreCase("setmusic")) {
+					if (p.getEquipment().getItemInMainHand() == null) {
+						p.sendMessage(ChatColor.RED + "Veuillez tenir un disque de musique dans votre main.");
+						return false;
+					}
+					
+					if (!p.getEquipment().getItemInMainHand().getType().isRecord()) {
+						p.sendMessage(ChatColor.RED + "Veuillez tenir un disque de musique dans votre main.");
+						return false;
+					}
+					
+					ItemStack filling = new ItemStack(Material.CYAN_STAINED_GLASS_PANE);
+					ItemMeta fillingMeta = filling.getItemMeta();
+					fillingMeta.setDisplayName(" ");
+					filling.setItemMeta(fillingMeta);
+					
+					ItemStack close = new ItemStack(Material.BARRIER);
+					ItemMeta closeMeta = filling.getItemMeta();
+					closeMeta.setDisplayName(ChatColor.RED + "Fermer");
+					close.setItemMeta(closeMeta);
+					
+					ItemStack next = new ItemStack(Material.ARROW);
+					ItemMeta nextMeta = next.getItemMeta();
+					nextMeta.setDisplayName(ChatColor.AQUA + "Page suivante");
+					next.setItemMeta(nextMeta);
+					
+					int itemCount = 0;
+					List<ItemStack> items = new ArrayList<ItemStack>(); 
+					List<String> dungeons = DataManager.getDungeons();
+					
+					for (int i = 0; i < dungeons.size(); i++) {
+						ItemStack item = new ItemStack(Material.CHISELED_STONE_BRICKS);
+						ItemMeta itemMeta = item.getItemMeta();
+						itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', dungeons.get(i)));
+						List<String> itemLore = new ArrayList<String>();
+						itemLore.add(" ");
+						if (DataManager.getMusic(dungeons.get(i)) == null) itemLore.add(ChatColor.RED + "Not set.");
+						else itemLore.add(ChatColor.DARK_AQUA + DataManager.getMusic(dungeons.get(i)).getType().name().toLowerCase().replace('_', ' '));
+						itemMeta.setLore(itemLore);
+						item.setItemMeta(itemMeta);
+						items.add(item);
+						itemCount++;
+					}
+					
+					Inventory inv = Bukkit.createInventory(null, 54, ChatColor.DARK_AQUA + "Pour quel donjon? - Page 1");
+					if (itemCount <= 9) inv = Bukkit.createInventory(null, 27, ChatColor.DARK_AQUA + "Pour quel donjon? - Page 1");
+					else if (itemCount <= 18) inv = Bukkit.createInventory(null, 36, ChatColor.DARK_AQUA + "Pour quel donjon? - Page 1");
+					else if (itemCount <= 27) inv = Bukkit.createInventory(null, 45, ChatColor.DARK_AQUA + "Pour quel donjon? - Page 1");
+					
+					for (int i = 0; i < items.size(); i++) {
+						inv.addItem(items.get(i));
+					}
+					
+					for (int i = (inv.getSize() - 18); i < inv.getSize(); i++) {
+						inv.setItem(i, filling);
+					}
+					
+					inv.setItem(inv.getSize() - 5, close);
+					if (itemCount > 36) inv.setItem(inv.getSize() - 4, next);
+					
+					p.openInventory(inv);
+					
 				} else {
-					p.sendMessage(ChatColor.RED + "Mauvais argument! Utilisez '/donjonmanager [setwaitroom | setstartregion | setplayeramount]'.");
+					p.sendMessage(ChatColor.RED + "Mauvais argument! Utilisez '/donjonmanager [setwaitroom | setstartregion | setplayeramount | setmusic]'.");
 				}
+				
 			} else {
-				p.sendMessage(ChatColor.RED + "Mauvais argument! Utilisez '/donjonmanager [setwaitroom | setstartregion | setplayeramount]'.");
+				p.sendMessage(ChatColor.RED + "Mauvais argument! Utilisez '/donjonmanager [setwaitroom | setstartregion | setplayeramount | setmusic]'.");
 			}
+			
 		}
 		
 		return false;

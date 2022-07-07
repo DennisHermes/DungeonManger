@@ -20,6 +20,7 @@ import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class DataManager {
 
@@ -52,6 +53,7 @@ public class DataManager {
 		World loadedMap = loadMap(worldFile);
 		games.put(loadedMap.getName(), dataList);
 		DungeonTeleporter.requestedWorlds.put(p, loadedMap);
+		DungeonTeleporter.requestedDonjon.put(p, dungeon);
 	}
 	
 	public static void joinGame(Player p, String game) {
@@ -60,6 +62,7 @@ public class DataManager {
 		dataList.set(2, players);
 		games.put(game, dataList);
 		DungeonTeleporter.requestedWorlds.put(p, Bukkit.getWorld(game));
+		DungeonTeleporter.requestedDonjon.put(p, DungeonTeleporter.requestedDonjon.get(Bukkit.getPlayer(dataList.get(2).split(",")[0])));
 	}
 	
 	public static void leaveGame(Player p, String game) {
@@ -98,6 +101,11 @@ public class DataManager {
 		    if (list.get(2).contains(p.getName())) return entry.getKey();
 		}
 		return null;
+	}
+	
+	public static String getDungeonOfGame(String game) {
+		List<String> dataList = games.get(game);
+		return dataList.get(0);
 	}
 	
 	//==================================================================================================================================================//
@@ -239,6 +247,26 @@ public class DataManager {
 		FileConfiguration settings = YamlConfiguration.loadConfiguration(settingsFile);
 		
 		return settings.getLocation("Waitingroom Location");
+	}
+	
+	public static void setMusic(ItemStack mat, String map) {
+		File settingsFile = new File(MainClass.getPlugin(MainClass.class).getDataFolder() + "/Settings.yml");
+		FileConfiguration settings = YamlConfiguration.loadConfiguration(settingsFile);
+		
+		settings.set("Music." + map, mat);
+		
+		try {
+			settings.save(settingsFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static ItemStack getMusic(String map) {
+		File settingsFile = new File(MainClass.getPlugin(MainClass.class).getDataFolder() + "/Settings.yml");
+		FileConfiguration settings = YamlConfiguration.loadConfiguration(settingsFile);
+		
+		return settings.getItemStack("Music." + map);
 	}
 	
 	public static boolean isPlayableWith(String dungeon, String players) {

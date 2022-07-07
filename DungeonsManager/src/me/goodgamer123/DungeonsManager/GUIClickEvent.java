@@ -230,6 +230,7 @@ public class GUIClickEvent implements Listener {
 					File worldFile = new File(MainClass.getPlugin(MainClass.class).getDataFolder() + "/" + worldName);
 					
 					DungeonTeleporter.requestedWorlds.put((Player) e.getWhoClicked(), DataManager.loadMap(worldFile));
+					DungeonTeleporter.requestedDonjon.put((Player) e.getWhoClicked(), worldName);
 				} else {
 					Inventory inv = Bukkit.createInventory(null, 27, ChatColor.AQUA + "Donjon: " + ChatColor.RESET + ChatColor.translateAlternateColorCodes('&', e.getCurrentItem().getItemMeta().getDisplayName()));
 					
@@ -305,11 +306,6 @@ public class GUIClickEvent implements Listener {
 				ItemMeta fillingMeta = filling.getItemMeta();
 				fillingMeta.setDisplayName(" ");
 				filling.setItemMeta(fillingMeta);
-				
-				ItemStack newGame = new ItemStack(Material.ARROW);
-				ItemMeta newGameMeta = newGame.getItemMeta();
-				newGameMeta.setDisplayName(ChatColor.AQUA + "Créer un nouveau jeu");
-				newGame.setItemMeta(newGameMeta);
 				
 				int itemCount = 0;
 				List<ItemStack> items = new ArrayList<ItemStack>(); 
@@ -387,6 +383,93 @@ public class GUIClickEvent implements Listener {
 				} else {
 					e.getWhoClicked().sendMessage(ChatColor.RED + "Le jeu est complet!");
 				}
+				
+			}
+		}
+		
+		
+		
+		else if (e.getView().getTitle().startsWith(ChatColor.DARK_AQUA + "Pour quel donjon?")) {
+			e.setCancelled(true);
+			
+			if (e.getCurrentItem().getType().equals(Material.BARRIER)) {
+				
+				e.getWhoClicked().closeInventory();
+				
+			} else if (e.getCurrentItem().getType().equals(Material.ARROW)) {
+				
+				ItemStack filling = new ItemStack(Material.CYAN_STAINED_GLASS_PANE);
+				ItemMeta fillingMeta = filling.getItemMeta();
+				fillingMeta.setDisplayName(" ");
+				filling.setItemMeta(fillingMeta);
+				
+				ItemStack close = new ItemStack(Material.BARRIER);
+				ItemMeta closeMeta = filling.getItemMeta();
+				closeMeta.setDisplayName(ChatColor.RED + "Fermer");
+				close.setItemMeta(closeMeta);
+				
+				ItemStack next = new ItemStack(Material.ARROW);
+				ItemMeta nextMeta = next.getItemMeta();
+				nextMeta.setDisplayName(ChatColor.AQUA + "Page suivante");
+				next.setItemMeta(nextMeta);
+				
+				ItemStack previous = new ItemStack(Material.ARROW);
+				ItemMeta previousMeta = previous.getItemMeta();
+				previousMeta.setDisplayName(ChatColor.AQUA + "Page précédente");
+				previous.setItemMeta(previousMeta);
+				
+				int currentPage = Integer.parseInt(ChatColor.stripColor(e.getView().getTitle().replace("Pour quel donjon? - Page ", "")));
+				int newPage = currentPage + 1;
+				if (e.getCurrentItem().getItemMeta().getDisplayName().equals(ChatColor.AQUA + "Page précédente")) newPage = currentPage - 1;
+				
+				int itemCount = 0;
+				List<ItemStack> items = new ArrayList<ItemStack>(); 
+				List<String> dungeons = DataManager.getDungeons();
+				
+				for (int i = (newPage - 1) * 36; i < dungeons.size(); i++) {
+					ItemStack item = new ItemStack(Material.CHISELED_STONE_BRICKS);
+					ItemMeta itemMeta = item.getItemMeta();
+					itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', dungeons.get(i)));
+					List<String> itemLore = new ArrayList<String>();
+					itemLore.add(" ");
+					if (DataManager.getMusic(dungeons.get(i)) == null) itemLore.add(ChatColor.RED + "Not set.");
+					else itemLore.add(ChatColor.DARK_AQUA + DataManager.getMusic(dungeons.get(i)).getType().name().toLowerCase().replace('_', ' '));
+					itemMeta.setLore(itemLore);
+					item.setItemMeta(itemMeta);
+					items.add(item);
+					itemCount++;
+				}
+				
+				Inventory inv = Bukkit.createInventory(null, 54, ChatColor.DARK_AQUA + "Pour quel donjon? - Page " + newPage);
+				if (itemCount <= 9) inv = Bukkit.createInventory(null, 27, ChatColor.DARK_AQUA + "Pour quel donjon? - Page " + newPage);
+				else if (itemCount <= 18) inv = Bukkit.createInventory(null, 36, ChatColor.DARK_AQUA + "Pour quel donjon? - Page " + newPage);
+				else if (itemCount <= 27) inv = Bukkit.createInventory(null, 45, ChatColor.DARK_AQUA + "Pour quel donjon? - Page " + newPage);
+				
+				for (int i = 0; i < items.size(); i++) {
+					inv.addItem(items.get(i));
+				}
+				
+				for (int i = (inv.getSize() - 18); i < inv.getSize(); i++) {
+					inv.setItem(i, filling);
+				}
+				
+				inv.setItem(inv.getSize() - 5, close);
+				if (itemCount > 36) inv.setItem(inv.getSize() - 4, next);
+				if (newPage > 1) inv.setItem(inv.getSize() - 6, previous);
+				
+				Inventory inv0 = inv;
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						e.getWhoClicked().openInventory(inv0);
+					}
+				}.runTaskLater(MainClass.getPlugin(MainClass.class), 1);
+				
+			} else if (e.getCurrentItem().getType().equals(Material.CHISELED_STONE_BRICKS)) {
+				
+				DataManager.setMusic(e.getWhoClicked().getEquipment().getItemInMainHand(), e.getCurrentItem().getItemMeta().getDisplayName().replace('§', '&'));
+				e.getWhoClicked().closeInventory();
+				e.getWhoClicked().sendMessage(ChatColor.GREEN + "Mise en place réussie de la musique!");
 				
 			}
 		}

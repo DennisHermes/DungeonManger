@@ -3,9 +3,11 @@ package me.goodgamer123.DungeonsManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Effect;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,6 +18,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class DungeonTeleporter implements Listener {
 
 	static HashMap<Player, World> requestedWorlds = new HashMap<Player, World>();
+	static HashMap<Player, String> requestedDonjon = new HashMap<Player, String>();
 	static List<Player> starting = new ArrayList<Player>();
 	
 	public static void StartSingleplayerCountdown(Player p) {
@@ -29,6 +32,7 @@ public class DungeonTeleporter implements Listener {
 						if (i0 == 10) {
 							p.sendTitle(ChatColor.DARK_AQUA + "Téléportation au donjon...", "", 1, 40, 1);
 							p.teleport(DungeonTeleporter.requestedWorlds.get(p).getSpawnLocation());
+							p.playEffect(p.getLocation(), Effect.RECORD_PLAY, DataManager.getMusic(requestedDonjon.get(p)).getType());
 							requestedWorlds.remove(p);
 							starting.remove(p);
 						} else {
@@ -47,7 +51,7 @@ public class DungeonTeleporter implements Listener {
 		starting.add(p);
 		for (int i = 0; i < 11; i++) {
 			int i0 = i;
-			new BukkitRunnable() { 
+			new BukkitRunnable() {
 				@Override
 				public void run() {
 					String game = DataManager.getGameOfPlayer(p);
@@ -66,6 +70,11 @@ public class DungeonTeleporter implements Listener {
 										Player foundPlayer = Bukkit.getPlayer(player);
 										foundPlayer.sendTitle(ChatColor.DARK_AQUA + "Téléportation au donjon...", "", 1, 40, 1);
 										foundPlayer.teleport(DungeonTeleporter.requestedWorlds.get(foundPlayer).getSpawnLocation());
+										p.playEffect(p.getLocation(), Effect.RECORD_PLAY, DataManager.getMusic(requestedDonjon.get(p)).getType());
+										for (Map.Entry<String, List<String>> entry : DataManager.games.entrySet()) {
+										    List<String> list = entry.getValue();
+										    if (entry.getKey().equals(game)) list.get(0);
+										}
 										requestedWorlds.remove(foundPlayer);
 										starting.remove(foundPlayer);
 										DataManager.games.remove(game);
